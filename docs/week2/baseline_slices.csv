@@ -1,0 +1,26 @@
+baseline,slice,n,late,precision,recall,f1,accuracy,flag_rate
+B0 Majority class (always on time),all rows,2400,415,0.0,0.0,0.0,0.8271,0.0
+B0 Majority class (always on time),extreme-value rows,424,315,0.0,0.0,0.0,0.2571,0.0
+B0 Majority class (always on time),non-extreme rows,1976,100,0.0,0.0,0.0,0.9494,0.0
+B0 Majority class (always on time),Mountain,134,19,0.0,0.0,0.0,0.8582,0.0
+B0 Majority class (always on time),non-Mountain,2266,396,0.0,0.0,0.0,0.8252,0.0
+B1 Stratified random (no-skill reference),all rows,2400,415,0.1752,0.1807,0.1779,0.7113,0.1783
+B1 Stratified random (no-skill reference),extreme-value rows,424,315,0.72,0.1714,0.2769,0.3349,0.1769
+B1 Stratified random (no-skill reference),non-extreme rows,1976,100,0.0595,0.21,0.0927,0.792,0.1786
+B1 Stratified random (no-skill reference),Mountain,134,19,0.0952,0.1053,0.1,0.7313,0.1567
+B1 Stratified random (no-skill reference),non-Mountain,2266,396,0.1794,0.1843,0.1818,0.7101,0.1796
+B2 Rule: bad weather AND non-van vehicle,all rows,2400,415,0.6784,0.4627,0.5501,0.8692,0.1179
+B2 Rule: bad weather AND non-van vehicle,extreme-value rows,424,315,0.9574,0.5714,0.7157,0.6627,0.4434
+B2 Rule: bad weather AND non-van vehicle,non-extreme rows,1976,100,0.1263,0.12,0.1231,0.9135,0.0481
+B2 Rule: bad weather AND non-van vehicle,Mountain,134,19,0.4545,0.2632,0.3333,0.8507,0.0821
+B2 Rule: bad weather AND non-van vehicle,non-Mountain,2266,396,0.6875,0.4722,0.5599,0.8703,0.12
+B3 Rule: any capped value or hour 23,all rows,2400,415,0.7429,0.759,0.7509,0.9129,0.1767
+B3 Rule: any capped value or hour 23,extreme-value rows,424,315,0.7429,1.0,0.8525,0.7429,1.0
+B3 Rule: any capped value or hour 23,non-extreme rows,1976,100,0.0,0.0,0.0,0.9494,0.0
+B3 Rule: any capped value or hour 23,Mountain,134,19,0.6471,0.5789,0.6111,0.8955,0.1269
+B3 Rule: any capped value or hour 23,non-Mountain,2266,396,0.7469,0.7677,0.7572,0.9139,0.1796
+B4 Fitted rule: one-split decision stump,all rows,2400,415,0.8365,0.3205,0.4634,0.8717,0.0662
+B4 Fitted rule: one-split decision stump,extreme-value rows,424,315,0.8365,0.4222,0.5612,0.5094,0.375
+B4 Fitted rule: one-split decision stump,non-extreme rows,1976,100,0.0,0.0,0.0,0.9494,0.0
+B4 Fitted rule: one-split decision stump,Mountain,134,19,0.5,0.1579,0.24,0.8582,0.0448
+B4 Fitted rule: one-split decision stump,non-Mountain,2266,396,0.8497,0.3283,0.4736,0.8725,0.0675
