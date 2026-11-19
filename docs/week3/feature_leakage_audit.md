@@ -25,6 +25,25 @@
 - **Suspected leak, sensitivity runs only:** the **cap / hour-23 indicators**. On its own, `n_extreme_flags` predicts lateness *better* than the known leak (CV AUC **0.865** vs **0.857**). A feature that is supposed to be available at the prediction point should not out-predict a field that is written after the outcome. Until Carlos confirms where the capped values come from, these features run only in a side-by-side sensitivity model.
 - **Cutoff logic.** There are no timestamps, so look-ahead can't be prevented by filtering on time. It is enforced instead at four levels: column availability, row scope, fitting scope and data split (§4). A test with target encoding shows the fitting rule matters: encoding `leg_id`, which is pure noise, on all rows gives a "perfect" AUC of **1.000**. Fit inside the training folds, it gives **0.500**.
 
+## 1a. Per-column leakage rating (every column in the training file)
+
+Rating scale: **safe** = known before t₀ and recorded before t₀ · **conditional** = known before t₀ in principle, but recording or availability must be confirmed (cutoff rule stated) · **leaked** = only known after the outcome. The same table is available as `docs/week3/feature_leakage_table.csv`.
+
+| Column | Description | Rating | Cutoff logic / exclusion rationale | Decision |
+|---|---|---|---|---|
+| `leg_id` | Unique record id | safe | Identifier only; target-encoding it gives a fake AUC of 1.0 | Excluded as feature (key only) |
+| `region` | Operational region | safe | Fixed before the leg starts | Include |
+| `scheduled_window_minutes` | Committed window width | safe | Set at order creation; the 480 cap is a separate at-cap indicator | Include |
+| `leg_distance_km` | Straight-line distance | safe | From the route plan; the 420 cap is a separate at-cap indicator | Include |
+| `vehicle_class` | Assigned vehicle class | safe | Fixed at assignment | Include |
+| `departure_hour` | Departure hour | conditional | Event precedes t₀, but hour 23 may be post-midnight times clipped by the midnight join (runs after the leg); time zone unconfirmed | Include with guard |
+| `weather_condition` | NOAA weather at departure | conditional | Fact precedes t₀; value arrives via an **overnight** join, so a live feed must exist at t₀ | Include with guard |
+| `avg_speed_kmh` | Speed over first 20% of leg | conditional | Must use pings up to the 20% mark only; records are written at close-out | Include with guard |
+| `stop_sequence_position` | Stop order in the daily route | conditional | Safe only if it is the *planned* order, not the actual order written at close-out | Include with guard |
+| `demand_spike_flag` | Region × day surge flag | conditional | Must be set in advance, not after the day | Include with guard |
+| **`carrier_close_code`** | Close-out status code | **leaked / post-outcome** | Entered after the outcome (data dictionary); agrees with the label on 92.5% of rows | **Excluded** |
+| `on_time_delivery` | Target source | leaked | It is the label | Target only |
+
 ## 2. The prediction point (t₀)
 
 From the Week 1 problem statement: **t₀ = the moment the vehicle has covered the first 20% of the leg distance.** A feature is legitimate only if its value is **known at or before t₀ in production**. Two different times matter:

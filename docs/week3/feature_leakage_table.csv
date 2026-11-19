@@ -1,0 +1,13 @@
+column,description,available_when,leakage_rating,cutoff_logic_or_exclusion_rationale,decision
+leg_id,Unique record identifier,At collection,safe,Identifier only; order behaves like a random shuffle (week 1 follow-up); target-encoding it gives a fake AUC of 1.0,excluded as feature (kept as key)
+region,Operational region where the leg originates,At dispatch (before departure),safe,Fixed before the leg starts; available at t0,include
+scheduled_window_minutes,Width of the customer-committed window (minutes),At order creation,safe,Set before dispatch; capped value 480 handled separately as an at-cap indicator,include
+leg_distance_km,Straight-line depot-to-address distance,At dispatch (route plan),safe,Computed from the plan before departure; capped value 420 handled as an at-cap indicator,include
+vehicle_class,Assigned vehicle class,At assignment,safe,Fixed when the truck is assigned,include
+departure_hour,Hour the vehicle left the depot,At departure (before t0),conditional,Event precedes t0; but hour 23 is 2x over-represented and hour 0 under-represented (possible post-midnight clipping by the midnight join that runs after the leg); time zone unconfirmed,include with guard
+weather_condition,NOAA weather category at departure,Departure event; value joined overnight,conditional,Fact precedes t0 but the value is added by an overnight batch after the leg; must confirm a live feed exists at t0,include with guard
+avg_speed_kmh,Avg speed over the first 20% of the leg,Exactly t0 by definition; record written at close-out,conditional,Must be computed only from pings up to the 20% mark; if aggregated at close-out over more of the leg it contains post-t0 driving; masked for legs < 2 km,include with guard
+stop_sequence_position,Position of the leg in the driver's daily route,Route plan (if planned order),conditional,Safe if it is the planned order; leaks if it is the actual completed order written at close-out,include with guard
+demand_spike_flag,Capacity-planning surge flag for region and day,Unverified,conditional,A day-level flag may be set after the day using actual volume; must confirm it is set in advance,include with guard
+carrier_close_code,Status code entered when the leg is formally closed out in the TMS,After the outcome is known,leaked,Post-outcome field (data dictionary); agrees with the label on 92.5% of rows; never available at t0,EXCLUDED - leaked / post-outcome
+on_time_delivery,Target source (1 = arrived within window),After the outcome is known,leaked,This is the label; is_late = 1 - on_time_delivery,target only

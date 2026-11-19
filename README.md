@@ -15,8 +15,9 @@ Predicting late delivery legs so dispatchers can reassign work or notify custome
 | 2 | Label construction & class balance audit | [docs/week2/label_audit_report.md](docs/week2/label_audit_report.md) · [scripts/build_labels.py](scripts/build_labels.py) |
 | 2 | EDA & anomaly detection | [notebooks/02_eda_anomaly_detection.ipynb](notebooks/02_eda_anomaly_detection.ipynb) |
 | 2 | Naive baselines & scorecard | [docs/week2/baseline_scorecard.md](docs/week2/baseline_scorecard.md) · [scripts/baselines.py](scripts/baselines.py) |
-| 3 | Feature candidates & leakage audit | [docs/week3/feature_leakage_audit.md](docs/week3/feature_leakage_audit.md) · [scripts/leakage_audit.py](scripts/leakage_audit.py) |
-| 3 | Feature engineering pipeline (v1.0.0) | [docs/week3/feature_pipeline.md](docs/week3/feature_pipeline.md) · [scripts/features.py](scripts/features.py) · [tests/](tests/test_features.py) |
+| 3 | Feature candidates & leakage audit | [docs/week3/feature_leakage_audit.md](docs/week3/feature_leakage_audit.md) · [per-column table](docs/week3/feature_leakage_table.csv) · [scripts/leakage_audit.py](scripts/leakage_audit.py) |
+| 3 | Feature engineering pipeline (v1.1.0) | [docs/week3/feature_pipeline.md](docs/week3/feature_pipeline.md) · [scripts/build_features.py](scripts/build_features.py) · [scripts/features.py](scripts/features.py) · [tests/](tests/test_features.py) |
+| 3 | Feature importance & redundancy | [docs/week3/feature_selection.md](docs/week3/feature_selection.md) · [scripts/feature_importance.py](scripts/feature_importance.py) · [chart](docs/week3/figures/permutation_importance_main.png) |
 
 ## Structure
 
@@ -41,7 +42,8 @@ python scripts/profile_train.py        # week 1 data profiling
 python scripts/build_labels.py         # week 2 label + segment audit
 python scripts/baselines.py            # week 2 baseline scorecard
 python scripts/leakage_audit.py        # week 3 leakage audit
-python scripts/features.py             # week 3 feature pipeline -> data/processed/
+python scripts/build_features.py       # week 3 feature pipeline (one command) -> data/processed/
+python scripts/feature_importance.py   # week 3 importance & redundancy (~10 min)
 python -m pytest tests -q              # tests
 ```
 

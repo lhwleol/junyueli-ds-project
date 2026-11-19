@@ -7,13 +7,15 @@ Two layers, deliberately separated (cutoff logic, audit §4):
   1. build_features(raw)   - deterministic, ROW-WISE features. Each value uses only that leg's own
                              columns, so it is safe to compute on any set of rows. NaNs are kept and
                              explicit missing indicators are added.
-  2. make_preprocessor()   - FITTED steps (median imputation, one-hot encoding). Returns an unfitted
+  2. make_preprocessor()   - FITTED steps (median imputation, one-hot encoding, vehicle-class
+                             aggregates). Returns an unfitted
                              sklearn ColumnTransformer that must be fit inside training folds only.
 
 Usage
 -----
-  python scripts/features.py                         # main feature set (no cap indicators)
-  python scripts/features.py --include-sensitivity   # also adds sens__* cap indicators
+  python scripts/build_features.py                   # one command: builds BOTH matrices from train_labeled.csv
+  python scripts/features.py                         # main feature set only (no at-cap indicators)
+  python scripts/features.py --include-sensitivity   # adds sens__at_cap_* indicators
 
 Outputs (data/ is git-ignored)
   data/processed/features_v{VERSION}.csv              row-wise features, NaNs kept
@@ -30,12 +32,13 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-FEATURE_VERSION = "1.0.0"
+FEATURE_VERSION = "1.1.0"
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "data" / "delivery_leg_telemetry_train.csv"
@@ -187,6 +190,43 @@ def feature_columns(include_sensitivity: bool = False) -> dict[str, list[str]]:
 
 
 # =============================== layer 2: fitted preprocessing ===================================
+class VehicleClassAggregates(BaseEstimator, TransformerMixin):
+    """Vehicle-level aggregates, FIT ON THE TRAINING FOLD ONLY.
+
+    For each vehicle class it learns the median early speed and median leg distance, then
+    expresses each leg relative to its class:
+      veh__speed_vs_class_median    = early speed / class median speed
+      veh__distance_vs_class_median = leg distance / class median distance
+    Missing class -> 'missing' group; unseen class or missing value -> 1.0 (= "typical for class").
+    Uses feature values only, never the label.
+    Input columns (in order): veh__class, veh__early_speed_kmh, route__leg_distance_km
+    """
+    out_names = ["veh__speed_vs_class_median", "veh__distance_vs_class_median"]
+
+    def fit(self, X, y=None):
+        X = pd.DataFrame(X).copy()
+        X.columns = ["cls", "speed", "dist"]
+        X["cls"] = X["cls"].fillna("missing")
+        self.speed_med_ = X.groupby("cls")["speed"].median().to_dict()
+        self.dist_med_ = X.groupby("cls")["dist"].median().to_dict()
+        self.global_speed_ = float(X["speed"].median())
+        self.global_dist_ = float(X["dist"].median())
+        return self
+
+    def transform(self, X):
+        X = pd.DataFrame(X).copy()
+        X.columns = ["cls", "speed", "dist"]
+        cls = X["cls"].fillna("missing")
+        sm = cls.map(self.speed_med_).fillna(self.global_speed_).astype(float)
+        dm = cls.map(self.dist_med_).fillna(self.global_dist_).astype(float)
+        out = pd.DataFrame({self.out_names[0]: (X["speed"].astype(float) / sm).fillna(1.0),
+                            self.out_names[1]: (X["dist"].astype(float) / dm).fillna(1.0)},
+                           index=X.index)
+        return out
+
+    def get_feature_names_out(self, input_features=None):
+        return np.array(self.out_names, dtype=object)
+
 def make_preprocessor(include_sensitivity: bool = False, scale_numeric: bool = False) -> ColumnTransformer:
     """UNFITTED. Fit inside training folds only (audit §4.3).
     scale_numeric=True adds standardisation (use for linear models; trees don't need it).
@@ -203,7 +243,9 @@ def make_preprocessor(include_sensitivity: bool = False, scale_numeric: bool = F
     ])
     ct = ColumnTransformer([("num", numeric, cols[NUMERIC]),
                             ("bin", binary, cols[BINARY]),
-                            ("cat", categorical, cols[CATEGORICAL])],
+                            ("cat", categorical, cols[CATEGORICAL]),
+                            ("veh_agg", VehicleClassAggregates(),
+                             ["veh__class", "veh__early_speed_kmh", "route__leg_distance_km"])],
                            remainder="drop", verbose_feature_names_out=False)
     ct.set_output(transform="pandas")
     return ct
@@ -225,6 +267,11 @@ def preprocessor_params(ct: ColumnTransformer) -> dict:
     p = {}
     for name, pipe, cols in ct.transformers_:
         if name == "remainder":
+            continue
+        if isinstance(pipe, VehicleClassAggregates):
+            p[name] = {"columns": list(cols),
+                       "class_median_speed_kmh": {k: float(v) for k, v in pipe.speed_med_.items()},
+                       "class_median_distance_km": {k: float(v) for k, v in pipe.dist_med_.items()}}
             continue
         imp = pipe.named_steps["impute"]
         p[name] = {"columns": list(cols), "impute_strategy": imp.strategy,
@@ -278,6 +325,8 @@ def run(raw_path: Path = RAW, include_sensitivity: bool = False) -> dict:
         "row_wise_features": {n: {"family": fam, "type": t, "description": d,
                                   "pct_missing_before_imputation": round(float(feats[n].isna().mean() * 100), 2)}
                               for n, (fam, t, d) in reg.items()},
+        "fitted_features": {n: "vehicle-level aggregate, fit on training rows only (VehicleClassAggregates)"
+                            for n in VehicleClassAggregates.out_names},
         "model_matrix_columns": [c for c in X.columns if c not in (ID_COL, TARGET)],
         "excluded_columns": {"carrier_close_code": "post-outcome (leak)", "on_time_delivery": "target source",
                              "leg_id": "identifier (kept as key, not a feature)"},

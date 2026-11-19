@@ -86,3 +86,25 @@ def test_bad_raw_input_is_rejected():
     dup = raw_rows(); dup.loc[1, "leg_id"] = "A"
     with pytest.raises(ValueError):
         F.build_features(dup)
+
+
+def test_vehicle_aggregates_are_fit_on_training_rows_only():
+    tr = F.build_features(raw_rows().iloc[:2])           # Light Van speed 50, Articulated 105
+    agg = F.VehicleClassAggregates().fit(tr[["veh__class", "veh__early_speed_kmh", "route__leg_distance_km"]])
+    assert agg.speed_med_["Light Van"] == 50.0
+    te = F.build_features(raw_rows().iloc[[3]])          # Heavy Rigid unseen, speed missing
+    out = agg.transform(te[["veh__class", "veh__early_speed_kmh", "route__leg_distance_km"]])
+    assert list(out.columns) == ["veh__speed_vs_class_median", "veh__distance_vs_class_median"]
+    assert out.iloc[0, 0] == 1.0                         # missing value -> "typical for class"
+
+
+def test_build_features_entry_point_is_deterministic(tmp_path, monkeypatch):
+    import build_features as B
+    src = tmp_path / "raw.csv"
+    raw_rows().to_csv(src, index=False)
+    monkeypatch.setattr(F, "ROOT", tmp_path)
+    monkeypatch.setattr(F, "OUT_DATA", tmp_path / "out")
+    monkeypatch.setattr(F, "OUT_DOCS", tmp_path / "docs")
+    a = B.build(src)["main"]["manifest"]["outputs"]
+    b = B.build(src)["main"]["manifest"]["outputs"]
+    assert a == b

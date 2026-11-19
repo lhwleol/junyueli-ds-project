@@ -1,0 +1,38 @@
+{
+  "feature_version": "1.1.0",
+  "keep": [
+    "route__leg_distance_km",
+    "route__stop_position",
+    "route__window_min",
+    "time__departure_hour",
+    "time__is_night",
+    "veh__class",
+    "veh__early_speed_kmh",
+    "wx__condition",
+    "wx__severity",
+    "wx__bad_weather_x_heavy",
+    "miss__early_speed"
+  ],
+  "drop": {
+    "veh__is_heavy": "noise: mean importance +0.0010 PR-AUC, 95% CI [-0.0001, +0.0021] includes 0; positive in 56% of folds",
+    "time__hour_cos": "noise: mean importance +0.0008 PR-AUC, 95% CI [-0.0008, +0.0025] includes 0; positive in 60% of folds",
+    "time__hour_sin": "noise: mean importance +0.0006 PR-AUC, 95% CI [-0.0016, +0.0027] includes 0; positive in 68% of folds",
+    "ops__demand_spike": "noise: mean importance +0.0003 PR-AUC, 95% CI [-0.0001, +0.0007] includes 0; positive in 52% of folds",
+    "time__period": "noise: mean importance +0.0002 PR-AUC, 95% CI [-0.0017, +0.0022] includes 0; positive in 48% of folds",
+    "route__region": "noise: mean importance +0.0002 PR-AUC, 95% CI [-0.0000, +0.0005] includes 0; positive in 72% of folds",
+    "miss__leg_distance": "noise: mean importance +0.0000 PR-AUC, 95% CI [-0.0000, +0.0001] includes 0; positive in 52% of folds",
+    "veh__window_slack_min": "noise: mean importance +0.0000 PR-AUC, 95% CI [-0.0011, +0.0011] includes 0; positive in 40% of folds",
+    "miss__departure_hour": "noise: mean importance -0.0000 PR-AUC, 95% CI [-0.0001, +0.0000] includes 0; positive in 36% of folds",
+    "miss__weather": "noise: mean importance -0.0001 PR-AUC, 95% CI [-0.0003, +0.0001] includes 0; positive in 48% of folds",
+    "route__km_per_window_hour": "noise: mean importance -0.0005 PR-AUC, 95% CI [-0.0017, +0.0008] includes 0; positive in 56% of folds",
+    "veh__implied_travel_min": "noise: mean importance -0.0005 PR-AUC, 95% CI [-0.0017, +0.0007] includes 0; positive in 60% of folds",
+    "route__is_late_route_stop": "redundant with route__stop_position (Spearman rho +0.85); route__stop_position is more important (+0.0091 vs +0.0025)"
+  },
+  "paired_pr_auc_diff_reduced_minus_full": {
+    "mean": -0.0032908066612421026,
+    "ci95": [
+      -0.00645621017868011,
+      -0.000125403143804095
+    ]
+  }
+}

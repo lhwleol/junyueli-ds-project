@@ -1,15 +1,15 @@
 {
-  "feature_version": "1.0.0",
-  "include_sensitivity": true,
+  "feature_version": "1.1.0",
+  "include_sensitivity": false,
   "input": {
-    "path": "data/delivery_leg_telemetry_train.csv",
-    "sha256": "cdba272153cbad39bb73d07466a4c5da4e82042e3877daae0a0a99846cb3fead",
+    "path": "data\\processed\\train_labeled.csv",
+    "sha256": "ddddab5a8db6c38369b9d736705de296657c1ee6f321cda399f314f6ccf0f8c8",
     "rows": 2400
   },
   "outputs": {
-    "features_v1.0.0_sens.csv": "32948afdaba7f57cb4853b4b424651d322390d9c4eefbfd3678bd252865833b4",
-    "model_matrix_v1.0.0_sens.csv": "bc697e17e8b6acd936ff2caa328ef0cc46a295f85efdc6194e34dccf9b39df51",
-    "preprocessor_v1.0.0_sens.json": "e98b1f23d1b520e48e25a6d6dcc2d0fe9a8a30f3e823dcad8801e7d63c9b8795"
+    "features_v1.1.0.csv": "cbdbd30079bfe58d5189d1bac39125349074a62fd32ba19a0242a468e2db88d7",
+    "model_matrix_v1.1.0.csv": "540915bbe1ddbde51afc1b0c2872bc491dfd35e29fe84ef857af2b804ef591aa",
+    "preprocessor_v1.1.0.json": "5fe010db02926faffadf7e07cc7fd706f7e5dfb4292ff6ae8eda8f63c36c6457"
   },
   "row_wise_features": {
     "route__leg_distance_km": {
@@ -155,43 +155,11 @@
       "type": "binary",
       "description": "1 if leg_distance_km missing",
       "pct_missing_before_imputation": 0.0
-    },
-    "sens__at_cap_leg_distance_km": {
-      "family": "sensitivity",
-      "type": "binary",
-      "description": "1 if leg_distance_km == 420 (suspected leakage, audit D13-D17)",
-      "pct_missing_before_imputation": 0.0
-    },
-    "sens__at_cap_avg_speed_kmh": {
-      "family": "sensitivity",
-      "type": "binary",
-      "description": "1 if avg_speed_kmh == 105 (suspected leakage, audit D13-D17)",
-      "pct_missing_before_imputation": 0.0
-    },
-    "sens__at_cap_scheduled_window_minutes": {
-      "family": "sensitivity",
-      "type": "binary",
-      "description": "1 if scheduled_window_minutes == 480 (suspected leakage, audit D13-D17)",
-      "pct_missing_before_imputation": 0.0
-    },
-    "sens__at_cap_stop_sequence_position": {
-      "family": "sensitivity",
-      "type": "binary",
-      "description": "1 if stop_sequence_position == 22 (suspected leakage, audit D13-D17)",
-      "pct_missing_before_imputation": 0.0
-    },
-    "sens__at_cap_departure_hour": {
-      "family": "sensitivity",
-      "type": "binary",
-      "description": "1 if departure_hour == 23 (suspected leakage, audit D13-D17)",
-      "pct_missing_before_imputation": 0.0
-    },
-    "sens__n_extreme_flags": {
-      "family": "sensitivity",
-      "type": "numeric",
-      "description": "Count of capped values incl. hour 23 (suspected leakage)",
-      "pct_missing_before_imputation": 0.0
     }
+  },
+  "fitted_features": {
+    "veh__speed_vs_class_median": "vehicle-level aggregate, fit on training rows only (VehicleClassAggregates)",
+    "veh__distance_vs_class_median": "vehicle-level aggregate, fit on training rows only (VehicleClassAggregates)"
   },
   "model_matrix_columns": [
     "route__leg_distance_km",
@@ -205,7 +173,6 @@
     "veh__implied_travel_min",
     "veh__window_slack_min",
     "wx__severity",
-    "sens__n_extreme_flags",
     "route__is_late_route_stop",
     "time__is_night",
     "veh__is_heavy",
@@ -215,11 +182,6 @@
     "miss__early_speed",
     "miss__weather",
     "miss__leg_distance",
-    "sens__at_cap_leg_distance_km",
-    "sens__at_cap_avg_speed_kmh",
-    "sens__at_cap_scheduled_window_minutes",
-    "sens__at_cap_stop_sequence_position",
-    "sens__at_cap_departure_hour",
     "route__region__midwest",
     "route__region__mountain",
     "route__region__northeast",
@@ -243,7 +205,9 @@
     "wx__condition__light_rain",
     "wx__condition__severe_storm",
     "wx__condition__snow",
-    "wx__condition__missing"
+    "wx__condition__missing",
+    "veh__speed_vs_class_median",
+    "veh__distance_vs_class_median"
   ],
   "excluded_columns": {
     "carrier_close_code": "post-outcome (leak)",

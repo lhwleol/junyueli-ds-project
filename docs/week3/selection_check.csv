@@ -1,0 +1,4 @@
+set,n_features,pr_auc_mean,pr_auc_std,f1_mean
+main (all features),24,0.8096,0.0355,0.7945
+main (reduced),11,0.8063,0.0373,0.7959
+sensitivity (+ at-cap),30,0.8006,0.0388,0.7769
