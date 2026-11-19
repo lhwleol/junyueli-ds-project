@@ -1,0 +1,211 @@
+{
+  "feature_version": "1.0.0",
+  "include_sensitivity": false,
+  "input": {
+    "path": "data\\delivery_leg_telemetry_train.csv",
+    "sha256": "cdba272153cbad39bb73d07466a4c5da4e82042e3877daae0a0a99846cb3fead",
+    "rows": 2400
+  },
+  "outputs": {
+    "features_v1.0.0.csv": "cbdbd30079bfe58d5189d1bac39125349074a62fd32ba19a0242a468e2db88d7",
+    "model_matrix_v1.0.0.csv": "465b5d5aefb44d75c813db7ed7bd342163565525d329ccffa8aef449a4b8a708",
+    "preprocessor_v1.0.0.json": "a3f3411330bf809991fb7ca869d4f2a96214417170708ef3f0a10ae185bca06e"
+  },
+  "row_wise_features": {
+    "route__leg_distance_km": {
+      "family": "route",
+      "type": "numeric",
+      "description": "Straight-line depot-to-address distance (km)",
+      "pct_missing_before_imputation": 7.0
+    },
+    "route__stop_position": {
+      "family": "route",
+      "type": "numeric",
+      "description": "Position of the leg in the driver's daily route (1 = first)",
+      "pct_missing_before_imputation": 7.04
+    },
+    "route__is_late_route_stop": {
+      "family": "route",
+      "type": "binary",
+      "description": "1 if stop position >= 15",
+      "pct_missing_before_imputation": 7.04
+    },
+    "route__window_min": {
+      "family": "route",
+      "type": "numeric",
+      "description": "Width of the customer-committed window (minutes)",
+      "pct_missing_before_imputation": 7.29
+    },
+    "route__km_per_window_hour": {
+      "family": "route",
+      "type": "numeric",
+      "description": "Distance divided by window width (km per window hour): planning difficulty",
+      "pct_missing_before_imputation": 13.83
+    },
+    "route__region": {
+      "family": "route",
+      "type": "categorical",
+      "description": "Operational region",
+      "pct_missing_before_imputation": 0.0
+    },
+    "time__departure_hour": {
+      "family": "time",
+      "type": "numeric",
+      "description": "Departure hour 0-23 (time zone unconfirmed)",
+      "pct_missing_before_imputation": 6.67
+    },
+    "time__hour_sin": {
+      "family": "time",
+      "type": "numeric",
+      "description": "sin(2*pi*hour/24), cyclical encoding",
+      "pct_missing_before_imputation": 6.67
+    },
+    "time__hour_cos": {
+      "family": "time",
+      "type": "numeric",
+      "description": "cos(2*pi*hour/24), cyclical encoding",
+      "pct_missing_before_imputation": 6.67
+    },
+    "time__is_night": {
+      "family": "time",
+      "type": "binary",
+      "description": "1 if departure hour 0-5",
+      "pct_missing_before_imputation": 6.67
+    },
+    "time__period": {
+      "family": "time",
+      "type": "categorical",
+      "description": "night / morning / afternoon / evening",
+      "pct_missing_before_imputation": 6.67
+    },
+    "veh__class": {
+      "family": "vehicle",
+      "type": "categorical",
+      "description": "Vehicle class",
+      "pct_missing_before_imputation": 7.75
+    },
+    "veh__is_heavy": {
+      "family": "vehicle",
+      "type": "binary",
+      "description": "1 if Articulated or Heavy Rigid",
+      "pct_missing_before_imputation": 7.75
+    },
+    "veh__early_speed_kmh": {
+      "family": "vehicle",
+      "type": "numeric",
+      "description": "Avg speed over first 20% of leg; set to missing for legs < 2.0 km",
+      "pct_missing_before_imputation": 6.79
+    },
+    "veh__implied_travel_min": {
+      "family": "vehicle",
+      "type": "numeric",
+      "description": "distance / early speed (minutes), clipped to [0, 1440]",
+      "pct_missing_before_imputation": 13.5
+    },
+    "veh__window_slack_min": {
+      "family": "vehicle",
+      "type": "numeric",
+      "description": "window width minus implied travel time (minutes)",
+      "pct_missing_before_imputation": 19.83
+    },
+    "wx__condition": {
+      "family": "weather",
+      "type": "categorical",
+      "description": "NOAA weather category at departure",
+      "pct_missing_before_imputation": 6.79
+    },
+    "wx__severity": {
+      "family": "weather",
+      "type": "numeric",
+      "description": "Ordinal weather severity 0-3",
+      "pct_missing_before_imputation": 6.79
+    },
+    "wx__bad_weather_x_heavy": {
+      "family": "weather",
+      "type": "binary",
+      "description": "1 if severity > 0 and heavy vehicle",
+      "pct_missing_before_imputation": 13.92
+    },
+    "ops__demand_spike": {
+      "family": "ops",
+      "type": "binary",
+      "description": "Capacity-planning surge flag",
+      "pct_missing_before_imputation": 6.5
+    },
+    "miss__departure_hour": {
+      "family": "missing",
+      "type": "binary",
+      "description": "1 if departure_hour missing (informative, EDA)",
+      "pct_missing_before_imputation": 0.0
+    },
+    "miss__early_speed": {
+      "family": "missing",
+      "type": "binary",
+      "description": "1 if avg_speed_kmh missing (telematics dropout)",
+      "pct_missing_before_imputation": 0.0
+    },
+    "miss__weather": {
+      "family": "missing",
+      "type": "binary",
+      "description": "1 if weather_condition missing",
+      "pct_missing_before_imputation": 0.0
+    },
+    "miss__leg_distance": {
+      "family": "missing",
+      "type": "binary",
+      "description": "1 if leg_distance_km missing",
+      "pct_missing_before_imputation": 0.0
+    }
+  },
+  "model_matrix_columns": [
+    "route__leg_distance_km",
+    "route__stop_position",
+    "route__window_min",
+    "route__km_per_window_hour",
+    "time__departure_hour",
+    "time__hour_sin",
+    "time__hour_cos",
+    "veh__early_speed_kmh",
+    "veh__implied_travel_min",
+    "veh__window_slack_min",
+    "wx__severity",
+    "route__is_late_route_stop",
+    "time__is_night",
+    "veh__is_heavy",
+    "wx__bad_weather_x_heavy",
+    "ops__demand_spike",
+    "miss__departure_hour",
+    "miss__early_speed",
+    "miss__weather",
+    "miss__leg_distance",
+    "route__region__midwest",
+    "route__region__mountain",
+    "route__region__northeast",
+    "route__region__southeast",
+    "route__region__southwest",
+    "route__region__west_coast",
+    "time__period__afternoon",
+    "time__period__evening",
+    "time__period__missing",
+    "time__period__morning",
+    "time__period__night",
+    "veh__class__articulated",
+    "veh__class__heavy_rigid",
+    "veh__class__light_van",
+    "veh__class__medium_rigid",
+    "veh__class__refrigerated",
+    "veh__class__missing",
+    "wx__condition__clear",
+    "wx__condition__fog",
+    "wx__condition__heavy_rain",
+    "wx__condition__light_rain",
+    "wx__condition__severe_storm",
+    "wx__condition__snow",
+    "wx__condition__missing"
+  ],
+  "excluded_columns": {
+    "carrier_close_code": "post-outcome (leak)",
+    "on_time_delivery": "target source",
+    "leg_id": "identifier (kept as key, not a feature)"
+  }
+}
